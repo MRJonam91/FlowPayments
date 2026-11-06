@@ -33,7 +33,7 @@ function printSponsorBanner(): void {
 
 function printHelp(): void {
   console.log(`
-FlowPayments — Deterministic Offline Payment Flow & Split Simulator v1.2.0-beta.1
+FlowPayments — Deterministic Offline Payment Flow & Split Simulator v1.0.0
 
 USAGE:
   flowpayments <command> [options]
@@ -162,7 +162,7 @@ function handleCli(): void {
   }
 
   if (command === "--version" || command === "-v") {
-    console.log("flowpayments v1.2.0-beta.1");
+    console.log("flowpayments v1.0.0");
     return;
   }
 

@@ -8,9 +8,9 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22.18-brightgreen.svg)](https://nodejs.org/)
 [![Zero Dependencies](https://img.shields.io/badge/runtime%20dependencies-0-success.svg)](package.json)
-[![Status: Beta v1.2.0](https://img.shields.io/badge/status-beta%20v1.2.0-blueviolet.svg)](docs/LAUNCH.md)
+[![Status: v1.0.0 Production-Ready](https://img.shields.io/badge/status-v1.0.0%20production--ready-brightgreen.svg)](docs/LAUNCH.md)
 
-[Italiano](README.it.md) • [English](README.md) • [Architecture](docs/ARCHITECTURE.md) • [Launch Checklist](docs/LAUNCH.md)
+[Italiano](README.it.md) • [English](README.md) • [Architecture](docs/ARCHITECTURE.md) • [Roadmap](docs/ROADMAP.md) • [Launch Checklist](docs/LAUNCH.md)
 
 <br/>
 

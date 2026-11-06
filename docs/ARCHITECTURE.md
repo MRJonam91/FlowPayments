@@ -48,12 +48,23 @@
    - Gli stati consentiti sono: `DRAFT`, `SIMULATED_DEPOSIT`, `ESCROW_LOCKED`, `PENDING_CONDITIONS`, `RELEASE_ELIGIBLE`, `EXECUTED_SPLIT`, `DISPUTED`, `REFUNDED`, `CANCELLED`.
    - I fondi restano bloccati nell'escrow vault finché tutti i requisiti (es. oracolo di consegna pacco, approvazione cliente, quorum QA) non sono soddisfatti.
    - Supporto a scenari di contenzioso (`DISPUTED`): congelamento immediato e composizione arbitrale con percentuali di rimborso all'acquirente e liquidazione al venditore.
+   - Politiche di timeout integrate (`refund_payer`, `freeze_dispute`, `release_remainder`).
 
-3. **Spiegazione Umana e Trasparenza (`src/core/explainer.ts`)**:
-   - Nessun "algoritmo a scatola chiusa": genera riepiloghi testuali ad alta leggibilità sia in italiano che in inglese.
-   - Genera diagrammi Mermaid Sequence per documentare visivamente contratti intelligenti, flussi marketplace e accordi milestone.
+3. **Composizione Fluida (`src/builder/index.ts`) e Scenari Scriptabili (`src/scenario/runner.ts`)**:
+   - `FlowBuilder`: pattern fluente per costruire e validare contratti finanziari in poche righe di codice.
+   - `ScenarioRunner`: motore di simulazione temporale con asserzioni su stati e saldi.
 
-4. **Confini Rigorosi**:
+4. **Simulatore Multivaluta & FX (`src/fx/index.ts`)**:
+   - Tassi di cambio con precisione a micro-unità ($10^6$) e detrazione spread/commissioni.
+
+5. **Liquidazione a Lotti (`src/batch/index.ts`)**:
+   - Consolidamento delle rimesse (*netted payouts*) tra flussi multipli con sigillo Merkle SHA-256.
+
+6. **Spiegazione Umana e Trasparenza (`src/core/explainer.ts`)**:
+   - Genera riepiloghi testuali ad alta leggibilità bilingui (IT/EN).
+   - Genera diagrammi Mermaid Sequence e Flowchart TD.
+
+7. **Confini Rigorosi**:
    - FlowPayments è esclusivamente un **simulatore offline**. Nessun wallet di custodia reale, nessun token speculativo, nessun trasferimento bancario diretto.
 
 ---
@@ -61,14 +72,37 @@
 ## 🇬🇧 Core Architecture
 
 1. **Double-Entry Ledger Integrity (`src/core/ledger.ts`)**:
-   - Transfers represent atomic movements between debit and credit accounts.
-   - All balances and values use strict integer arithmetic (cents) preventing IEEE-754 floating point inaccuracies.
+   - Atomic movements between debit and credit accounts using strict integer arithmetic (cents).
    - Cryptographically linked SHA-256 journal entries guarantee tamper-evident audit trails.
 
 2. **Condition Engine & State Machine (`src/core/engine.ts`)**:
-   - Manages formal state transitions from escrow lock to split releases.
-   - Supports multi-signature quorum, event attestations, and waterfall priorities.
+   - Formal state transitions from escrow lock to split releases.
+   - Supports multi-signature quorum, event attestations, compound rules, and waterfall priorities.
    - Built-in dispute resolution paths simulate partial refunds and fee allocations.
 
-3. **Human Explainability (`src/core/explainer.ts`)**:
-   - Translates raw financial parameters into plain language reports and Mermaid sequence diagrams.
+3. **Fluent FlowBuilder & Scripted ScenarioRunner**:
+   - Declarative fluent API with automated schema validation.
+   - Scripted timeline execution engine with programmatic assertion checking.
+
+4. **Multi-Currency FX & Batch Settlement Engines**:
+   - Fixed-ratio micro-rate foreign exchange simulation with spread tracking.
+   - High-throughput batch settlement engine producing netted payee balances and Merkle seals.
+
+---
+
+## 📋 Tabella Codici di Errore / Error Code Catalog
+
+| Codice / Code | Descrizione / Description |
+|---|---|
+| `FLWP-ERR-1002` | Conto non trovato nel registro contabile / Account not found in ledger |
+| `FLWP-ERR-1003` | Importo del trasferimento non valido (deve essere intero positivo) / Transfer amount must be positive integer cents |
+| `FLWP-ERR-1004` | Discrepanza di valuta tra conti / Currency mismatch |
+| `FLWP-ERR-1005` | Saldo insufficiente nel conto mittente / Insufficient balance in source account |
+| `FLWP-ERR-2001` | Validazione fallita nel FlowBuilder / FlowBuilder validation failed |
+| `FLWP-ERR-3091` | Somma degli scaglioni milestone diversa dal totale escrow / Milestone allocation sum mismatch |
+| `FLWP-ERR-4022` | Condizione prerequisito non soddisfatta blocca il rilascio / Unmet condition blocks release |
+| `FLWP-ERR-5001` | Asserzione di stato fallita nello scenario / Status assertion failed |
+| `FLWP-ERR-5002` | Asserzione di saldo fallita nello scenario / Balance assertion failed |
+| `FLWP-ERR-6001` | Importo negativo nella conversione FX / Negative amount in FX conversion |
+| `FLWP-ERR-6002` | Coppia di valute non supportata / Unsupported FX currency pair |
+| `FLWP-ERR-7001` | Discrepanza di valuta nella liquidazione a lotti / Batch currency mismatch |

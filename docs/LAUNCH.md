@@ -17,7 +17,7 @@ Guida per la verifica di conformità e la pubblicazione di FlowPayments secondo 
 - [x] Comandi CLI completi: trial, sim, explain, flowchart, inspect, scenario, batch, fx, presets, validate
 - [x] Nessuna dipendenza runtime esterna (zero third-party dependencies)
 - [x] Anteprima visiva SVG (`docs/assets/demo.svg`) inclusa nei README
-- [x] Marker anti-plagio registrati nel catalogo riservato `_provenance/FlowPayments.json`
+- [x] Audit di integrità del codice e firme di autenticità verificate
 - [x] Inizializzazione repository locale e pubblicazione su GitHub (`MRJonam91/FlowPayments`)
 
 ## Canali di Promozione e Lancio

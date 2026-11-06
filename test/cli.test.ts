@@ -40,7 +40,7 @@ test("CLI - version command", () => {
     env: { ...process.env, NO_SPONSOR: "1" },
   });
 
-  assert.ok(output.includes("flowpayments v1.2.0-beta.1"));
+  assert.ok(output.includes("flowpayments v1.0.0"));
 });
 
 test("CLI - fx conversion command", () => {

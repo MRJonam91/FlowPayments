@@ -1,6 +1,6 @@
 {
   "name": "flowpayments",
-  "version": "1.2.0-beta.1",
+  "version": "1.0.0",
   "description": "Deterministic offline simulator & verification engine for conditional, milestone-based, and multi-party split payments with double-entry integrity and zero real-fund exposure.",
   "type": "module",
   "license": "Apache-2.0",
