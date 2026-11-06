@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" width="100%" height="100%">
+  <metadata>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+      <rdf:Description>
+        <dc:identifier>flwp.ledger.7104e9</dc:identifier>
+        <dc:creator>Manoj Rollo (MRJonam91)</dc:creator>
+        <dc:title>FlowPayments Verifiable Terminal Trial Simulation</dc:title>
+      </rdf:Description>
+    </rdf:RDF>
+  </metadata>
+  <rect width="880" height="440" rx="10" fill="#0d1117" stroke="#30363d" stroke-width="2"/>
+  <circle cx="28" cy="24" r="6" fill="#f85149" />
+  <circle cx="48" cy="24" r="6" fill="#d29922" />
+  <circle cx="68" cy="24" r="6" fill="#3fb950" />
+  <text x="100" y="28" font-family="ui-monospace, monospace" font-size="13" fill="#8b949e">flowpayments trial --lang en</text>
+
+  <!-- Content Box -->
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="13" fill="#c9d1d9">
+    <text x="32" y="70" fill="#58a6ff" font-weight="bold">═══════════════════════════════════════════════════════════════════════════</text>
+    <text x="32" y="92" fill="#ffffff" font-weight="bold">  FLOWPAYMENTS — VERIFIABLE TRIAL &amp; RECONCILIATION SUITE</text>
+    <text x="32" y="112" fill="#8b949e">  Deterministic Offline Engine | Double-Entry Invariants: 100% BALANCED</text>
+    <text x="32" y="132" fill="#58a6ff" font-weight="bold">═══════════════════════════════════════════════════════════════════════════</text>
+
+    <text x="32" y="170" fill="#388bfd" font-weight="bold">▶ [SCENARIO 1] E-Commerce Marketplace Order with Logistics Attestation:</text>
+    <text x="48" y="195">• Status: <tspan fill="#3fb950" font-weight="bold">EXECUTED_SPLIT</tspan> | Initial Deposit: <tspan fill="#ffffff" font-weight="bold">€ 100.00</tspan> | Discrepancy: <tspan fill="#3fb950" font-weight="bold">0.00c</tspan></text>
+    <text x="48" y="218">• Allocations: Platform Fee <tspan fill="#d29922">€ 11.50</tspan> · Affiliate Bob <tspan fill="#58a6ff">€ 3.00</tspan> · Merchant Net <tspan fill="#3fb950">€ 85.50</tspan></text>
+
+    <text x="32" y="260" fill="#388bfd" font-weight="bold">▶ [SCENARIO 2] Two-Phase Milestone Freelance Escrow with Quorum Acceptance:</text>
+    <text x="48" y="285">• Deposit: <tspan fill="#ffffff" font-weight="bold">€ 3,000.00</tspan> | Quorum: <tspan fill="#3fb950">Client + Independent QA Auditor (2/2)</tspan></text>
+    <text x="48" y="308">• Status: <tspan fill="#3fb950" font-weight="bold">EXECUTED_SPLIT</tspan> | Developer Payout: <tspan fill="#3fb950">€ 2,760.00</tspan> · Platform Escrow: <tspan fill="#d29922">€ 240.00</tspan></text>
+
+    <text x="32" y="350" fill="#388bfd" font-weight="bold">▶ [SCENARIO 3] Tiered Waterfall Royalty &amp; Senior Recoupment Cascade:</text>
+    <text x="48" y="375">• Senior Investor Loan Cap: <tspan fill="#58a6ff">€ 2,000.00</tspan> · Creator Pool (75%): <tspan fill="#3fb950">€ 2,250.00</tspan> · Reserve: <tspan fill="#8b949e">€ 750.00</tspan></text>
+
+    <text x="32" y="415" fill="#3fb950" font-weight="bold">✔ ZERO FLOATING-POINT DRIFT · SHA-256 HASH CHAIN RECONCILED (bf7429...)</text>
+  </g>
+</svg>
