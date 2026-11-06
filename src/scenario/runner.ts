@@ -15,6 +15,7 @@ export type ScenarioAction =
   | { type: "approve"; conditionId: string; partyId: string }
   | { type: "event"; conditionId: string; key: string; value: unknown }
   | { type: "release"; milestoneId?: string }
+  | { type: "refund"; reason: string; amountCents?: number }
   | { type: "dispute"; reason: string; feeCents?: number; feeRecipientId?: string }
   | { type: "resolve_dispute"; buyerRefundPct: number; sellerPayoutPct: number; sellerId: string }
   | { type: "assert_status"; expectedStatus: FlowStatus }
@@ -79,6 +80,11 @@ export class ScenarioRunner {
       case "release":
         stepRes = this.simulator.executeRelease(action.milestoneId);
         note = action.milestoneId ? `Released milestone ${action.milestoneId}` : "Released all splits";
+        break;
+
+      case "refund":
+        stepRes = this.simulator.executeRefund(action.reason, action.amountCents);
+        note = `Refunded: ${action.reason}`;
         break;
 
       case "dispute":

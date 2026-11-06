@@ -97,6 +97,12 @@ export class DoubleEntryLedger {
       );
     }
 
+    if (sourceAccountId === destAccountId) {
+      throw new Error(
+        `[FLWP-ERR-1006] Source and destination account cannot be identical: ${sourceAccountId}`
+      );
+    }
+
     const source = this.requireAccount(sourceAccountId);
     const dest = this.requireAccount(destAccountId);
 

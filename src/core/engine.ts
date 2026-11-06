@@ -401,6 +401,10 @@ export class PaymentFlowSimulator {
         throw new Error(`Milestone ${milestoneId} not found`);
       }
 
+      if (milestone.status === "RELEASED") {
+        throw new Error(`[FLWP-ERR-4023] Milestone ${milestoneId} has already been released`);
+      }
+
       const unmetMilestoneConditions = milestone.conditionIds.filter(
         (cid) => !this.conditionsState.get(cid)?.isSatisfied
       );
@@ -449,6 +453,16 @@ export class PaymentFlowSimulator {
     }
 
     // Global release
+    if (this.currentStatus === "EXECUTED_SPLIT") {
+      throw new Error(`[FLWP-ERR-4024] Flow funds have already been fully released`);
+    }
+    if (this.currentStatus === "REFUNDED" || this.currentStatus === "CANCELLED") {
+      throw new Error(`[FLWP-ERR-4025] Cannot release funds from status ${this.currentStatus}`);
+    }
+    if (this.currentStatus === "DISPUTED") {
+      throw new Error(`[FLWP-ERR-4026] Cannot execute release while flow is under active dispute`);
+    }
+
     if (unmet.length > 0) {
       throw new Error(
         `[FLWP-ERR-4022] Unmet prerequisite condition blocks release transition: ${unmet.join(", ")}`

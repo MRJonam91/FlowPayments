@@ -225,4 +225,17 @@ export class FlowBuilder {
 
     return flow;
   }
+
+  public toJson(pretty = true): string {
+    return JSON.stringify(this.build(), null, pretty ? 2 : undefined);
+  }
+
+  public static fromJson(jsonStr: string): FlowDefinition {
+    const parsed = JSON.parse(jsonStr) as FlowDefinition;
+    const val = PaymentFlowSimulator.validate(parsed);
+    if (!val.isValid) {
+      throw new Error(`[FLWP-ERR-2001] Flow validation failed:\n  ${val.errors.join("\n  ")}`);
+    }
+    return parsed;
+  }
 }

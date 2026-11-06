@@ -43,6 +43,7 @@ COMMANDS:
   trial                 Run verifiable multi-scenario test suite & double-entry reconciliation
   sim <flow.json>       Execute simulated payment flow from JSON definition
   explain <flow.json>   Generate human-readable breakdown of flow splits and triggers
+  audit <flow.json>     Output full cryptographic audit certificate and ledger trace
   flowchart <flow.json> Generate Mermaid flowchart TD diagram
   inspect <flow.json>   Display real-time condition tree diagnostics and rules
   validate <flow.json>  Verify flow percentages, remainder rules, and condition references
@@ -203,6 +204,36 @@ function handleCli(): void {
       console.log(FlowExplainer.formatConditionStatus(sim.getConditions(), lang));
     } catch (err: unknown) {
       console.error(`Inspection failed: ${(err as Error).message}`);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (command === "audit") {
+    const filePath = args[1];
+    if (!filePath) {
+      console.error("Error: Please provide a flow JSON file path. Usage: flowpayments audit <path.json>");
+      process.exit(1);
+    }
+    const langIdx = args.indexOf("--lang");
+    const lang = langIdx !== -1 && args[langIdx + 1] === "it" ? "it" : "en";
+
+    try {
+      const content = readFileSync(resolve(process.cwd(), filePath), "utf8");
+      const flow: FlowDefinition = JSON.parse(content);
+      const sim = new PaymentFlowSimulator(flow);
+      sim.depositSimulatedFunds();
+      if (sim.getUnmetConditionIds().length === 0) {
+        sim.executeRelease();
+      }
+      const report = sim.generateAuditReport();
+      if (args.includes("--json")) {
+        console.log(JSON.stringify(report, null, 2));
+      } else {
+        console.log(FlowExplainer.formatAuditReport(report, lang));
+      }
+    } catch (err: unknown) {
+      console.error(`Audit failed: ${(err as Error).message}`);
       process.exit(1);
     }
     return;

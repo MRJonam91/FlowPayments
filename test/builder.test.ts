@@ -27,6 +27,18 @@ test("FlowBuilder - builds a valid marketplace flow declaratively", () => {
   assert.equal(flow.conditions.length, 1);
   assert.equal(flow.timeoutMs, 86400000);
   assert.equal(flow.timeoutAction, "refund_payer");
+
+  // Serialization & Deserialization
+  const jsonStr = FlowBuilder.create("order-9912", "EUR")
+    .payer("buyer_123")
+    .amount(25000)
+    .addFixedSplit("s1", "acc_1", 200, "fee")
+    .addRemainderSplit("s2", "acc_2", "net")
+    .toJson();
+
+  const parsed = FlowBuilder.fromJson(jsonStr);
+  assert.equal(parsed.id, "order-9912");
+  assert.equal(parsed.totalAmountCents, 25000);
 });
 
 test("FlowBuilder - throws error when building invalid configuration", () => {

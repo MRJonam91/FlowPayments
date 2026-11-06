@@ -50,3 +50,19 @@ test("ScenarioRunner - catches failed assertion", () => {
     /\[FLWP-ERR-5001\]/
   );
 });
+
+test("ScenarioRunner - handles refund action", () => {
+  const flow = FlowBuilder.create("sc-refund", "EUR")
+    .payer("payer_ref")
+    .amount(10000)
+    .addRemainderSplit("s1", "seller_ref")
+    .build();
+
+  const runner = new ScenarioRunner(flow);
+  runner.runAll([
+    { type: "deposit" },
+    { type: "refund", reason: "Order canceled by customer" },
+    { type: "assert_status", expectedStatus: "REFUNDED" },
+    { type: "assert_balance", accountId: "payer_ref", expectedCents: 10000 },
+  ]);
+});

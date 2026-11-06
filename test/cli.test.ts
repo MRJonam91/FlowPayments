@@ -115,3 +115,34 @@ test("CLI - inspect command", () => {
     } catch {}
   }
 });
+
+test("CLI - audit command", () => {
+  const tmpFlowPath = resolve("tmp_audit.json");
+  writeFileSync(
+    tmpFlowPath,
+    JSON.stringify({
+      id: "cli_audit_test",
+      title: "CLI Audit Test",
+      description: "auditing",
+      currency: "EUR",
+      totalAmountCents: 8000,
+      payerId: "p_audit",
+      conditions: [],
+      splits: [{ id: "s1", recipientId: "payee_audit", type: "remainder", description: "all" }],
+    })
+  );
+
+  try {
+    const output = execFileSync("node", [cliPath, "audit", tmpFlowPath], {
+      encoding: "utf8",
+      env: { ...process.env, NO_SPONSOR: "1" },
+    });
+    assert.ok(output.includes("FLOWPAYMENTS LEDGER AUDIT CERTIFICATE"));
+    assert.ok(output.includes("Discrepancy: 0.00c"));
+    assert.ok(output.includes("payee_audit"));
+  } finally {
+    try {
+      unlinkSync(tmpFlowPath);
+    } catch {}
+  }
+});

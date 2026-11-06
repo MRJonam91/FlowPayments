@@ -98,9 +98,14 @@
 | `FLWP-ERR-1003` | Importo del trasferimento non valido (deve essere intero positivo) / Transfer amount must be positive integer cents |
 | `FLWP-ERR-1004` | Discrepanza di valuta tra conti / Currency mismatch |
 | `FLWP-ERR-1005` | Saldo insufficiente nel conto mittente / Insufficient balance in source account |
+| `FLWP-ERR-1006` | Conto mittente e destinatario identici non ammessi / Source and destination account cannot be identical |
 | `FLWP-ERR-2001` | Validazione fallita nel FlowBuilder / FlowBuilder validation failed |
 | `FLWP-ERR-3091` | Somma degli scaglioni milestone diversa dal totale escrow / Milestone allocation sum mismatch |
 | `FLWP-ERR-4022` | Condizione prerequisito non soddisfatta blocca il rilascio / Unmet condition blocks release |
+| `FLWP-ERR-4023` | Milestone già rilasciata in precedenza / Milestone already released |
+| `FLWP-ERR-4024` | Fondi del flusso già interamente rilasciati / Flow funds already fully released |
+| `FLWP-ERR-4025` | Impossibile rilasciare fondi da stato rimborsato o annullato / Cannot release from refunded or cancelled status |
+| `FLWP-ERR-4026` | Impossibile rilasciare fondi durante contenzioso attivo / Cannot release during active dispute |
 | `FLWP-ERR-5001` | Asserzione di stato fallita nello scenario / Status assertion failed |
 | `FLWP-ERR-5002` | Asserzione di saldo fallita nello scenario / Balance assertion failed |
 | `FLWP-ERR-6001` | Importo negativo nella conversione FX / Negative amount in FX conversion |

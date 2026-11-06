@@ -46,6 +46,10 @@ test("DoubleEntryLedger - rejects negative, zero or non-integer transfers", () =
     () => ledger.transfer("f1", "a", "b", 0, "Zero transfer"),
     /\[FLWP-ERR-1003\]/
   );
+  assert.throws(
+    () => ledger.transfer("f1", "a", "a", 100, "Self transfer"),
+    /\[FLWP-ERR-1006\]/
+  );
 });
 
 test("DoubleEntryLedger - cryptographic chaining detects journal tampering", () => {

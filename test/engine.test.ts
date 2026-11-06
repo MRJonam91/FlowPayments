@@ -91,6 +91,12 @@ test("PaymentFlowSimulator - milestone freelance escrow with quorum approvals", 
   assert.equal(devAcc.balanceCents, 276000);
   assert.equal(feeAcc.balanceCents, 24000);
   assert.equal(devAcc.balanceCents + feeAcc.balanceCents, 300000);
+
+  // Attempting to release an already released milestone throws error
+  assert.throws(
+    () => sim.executeRelease("milestone_phase_2"),
+    /\[FLWP-ERR-4023\]/
+  );
 });
 
 test("PaymentFlowSimulator - waterfall recoupment tiers", () => {
