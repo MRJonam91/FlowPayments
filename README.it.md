@@ -8,7 +8,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/Licenza-Apache%202.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22.18-brightgreen.svg)](https://nodejs.org/)
 [![Zero Dipendenze](https://img.shields.io/badge/dipendenze%20runtime-0-success.svg)](package.json)
-[![Stato: MVP Verificabile](https://img.shields.io/badge/stato-MVP%20verificabile-success.svg)](docs/LAUNCH.md)
+[![Stato: Beta v1.2.0](https://img.shields.io/badge/stato-beta%20v1.2.0-blueviolet.svg)](docs/LAUNCH.md)
 
 [Italiano](README.it.md) • [English](README.md) • [Architettura](docs/ARCHITECTURE.md) • [Checklist di Lancio](docs/LAUNCH.md)
 

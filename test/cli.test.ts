@@ -40,7 +40,17 @@ test("CLI - version command", () => {
     env: { ...process.env, NO_SPONSOR: "1" },
   });
 
-  assert.ok(output.includes("flowpayments v1.1.0-alpha.1"));
+  assert.ok(output.includes("flowpayments v1.2.0-beta.1"));
+});
+
+test("CLI - fx conversion command", () => {
+  const output = execFileSync("node", [cliPath, "fx", "10000", "EUR", "USD"], {
+    encoding: "utf8",
+    env: { ...process.env, NO_SPONSOR: "1" },
+  });
+
+  assert.ok(output.includes("FX Conversion:"));
+  assert.ok(output.includes("$ 107.96"));
 });
 
 test("CLI - flowchart command", () => {
@@ -66,6 +76,39 @@ test("CLI - flowchart command", () => {
     });
     assert.ok(output.includes("flowchart TD"));
     assert.ok(output.includes("buyer_test"));
+  } finally {
+    try {
+      unlinkSync(tmpFlowPath);
+    } catch {}
+  }
+});
+
+test("CLI - inspect command", () => {
+  const tmpFlowPath = resolve("tmp_inspect.json");
+  writeFileSync(
+    tmpFlowPath,
+    JSON.stringify({
+      id: "cli_inspect_test",
+      title: "CLI Inspect Test",
+      description: "inspecting",
+      currency: "EUR",
+      totalAmountCents: 5000,
+      payerId: "p_inspect",
+      conditions: [
+        { id: "c1", type: "manual_approval", description: "Approval required", authorizedParties: ["admin"] }
+      ],
+      splits: [{ id: "s1", recipientId: "payee_inspect", type: "remainder", description: "all" }],
+    })
+  );
+
+  try {
+    const output = execFileSync("node", [cliPath, "inspect", tmpFlowPath], {
+      encoding: "utf8",
+      env: { ...process.env, NO_SPONSOR: "1" },
+    });
+    assert.ok(output.includes("FLOW EXPLANATION"));
+    assert.ok(output.includes("CURRENT CONDITIONS STATUS"));
+    assert.ok(output.includes("PENDING"));
   } finally {
     try {
       unlinkSync(tmpFlowPath);

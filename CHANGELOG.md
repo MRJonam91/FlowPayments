@@ -3,6 +3,25 @@
 Tutte le modifiche rilevanti a questo progetto sono documentate in questo file.
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) e aderisce al [Semantic Versioning](https://semver.org/).
 
+## [1.2.0-beta.1] - 2026-11-06
+
+### 🇮🇹 Novità / Added
+- **BatchSettlementEngine (`src/batch/index.ts`)**:
+  - Motore di liquidazione a lotti per marketplace e piattaforme con consolidamento dei pagamenti verso i beneficiari (*netted payouts aggregation*).
+  - Generazione di sigillo crittografico Merkle (`batchDigest` SHA-256) per certificare l'integrità dell'intero lotto di flussi.
+- **FxExchangeSimulator (`src/fx/index.ts`)**:
+  - Simulatore offline deterministico per tassi di cambio valuta (EUR, USD, GBP, CHF) con aritmetica a precisione intera (`microRate` su scala $10^6$) e detrazione spread/commissioni di conversione.
+- **Ispezione Condizioni in Tempo Reale (`formatConditionStatus`)**:
+  - Albero diagnostico che visualizza lo stato di ogni condizione di sblocco (soddisfatta, in attesa, quorum di firme raccolte).
+- **Nuovi Comandi da CLI**:
+  - `flowpayments batch <batch.json>`: esecuzione ed esportazione delle liquidazioni nette a lotti.
+  - `flowpayments fx <importoCentesimi> <daValuta> <aValuta>`: simulazione istantanea di cambio valuta.
+  - `flowpayments inspect <flusso.json>`: albero diagnostico avanzato delle condizioni di sblocco.
+- **Suite di Test Estesa**:
+  - 35 test automatizzati completi con test per FX, Batch Settlement, condizioni composte (`all_of`, `any_of`) e integrazione CLI.
+
+---
+
 ## [1.1.0-alpha.1] - 2026-11-06
 
 ### 🇮🇹 Novità / Added

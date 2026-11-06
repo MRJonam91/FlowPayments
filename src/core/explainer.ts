@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Manoj Rollo (MRJonam91)
 
-import type { FlowAuditReport, FlowDefinition } from "./types.ts";
+import type { FlowAuditReport, FlowCondition, FlowDefinition } from "./types.ts";
 
 /**
  * Format integer cents into human currency string (e.g., 12550 -> "€ 125.50")
@@ -262,6 +262,39 @@ export class FlowExplainer {
       );
     }
 
+    return out.join("\n");
+  }
+
+  /**
+   * Formats a clear real-time diagnostic status tree of condition satisfaction
+   */
+  public static formatConditionStatus(
+    conditions: FlowCondition[],
+    lang: "it" | "en" = "en"
+  ): string {
+    const isIt = lang === "it";
+    const out: string[] = [
+      isIt ? "── STATO ATTUALE CONDIZIONI ──" : "── CURRENT CONDITIONS STATUS ──",
+    ];
+    for (const c of conditions) {
+      const check = c.isSatisfied
+        ? isIt
+          ? "✔ SODDISFATTA"
+          : "✔ SATISFIED"
+        : isIt
+          ? "⏳ IN ATTESA"
+          : "⏳ PENDING";
+      out.push(`  • [${c.id}] ${c.description} -> ${check}`);
+      if (!c.isSatisfied && (c.type === "quorum_approval" || c.type === "manual_approval")) {
+        const collected = c.approvalsCollected?.length ?? 0;
+        const required = c.quorumRequired ?? 1;
+        out.push(
+          isIt
+            ? `     Firme raccolte: ${collected}/${required}`
+            : `     Signatures collected: ${collected}/${required}`
+        );
+      }
+    }
     return out.join("\n");
   }
 }

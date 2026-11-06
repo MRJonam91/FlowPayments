@@ -5,15 +5,18 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  BatchSettlementEngine,
   DoubleEntryLedger,
   FlowBuilder,
   FlowExplainer,
+  FxExchangeSimulator,
   PaymentFlowSimulator,
   ScenarioRunner,
   formatCurrency,
   marketplaceSplitPreset,
   milestoneEscrowPreset,
   waterfallRoyaltyPreset,
+  type CurrencyCode,
   type ScenarioAction,
 } from "../index.ts";
 import type { FlowDefinition } from "../core/types.ts";
@@ -30,7 +33,7 @@ function printSponsorBanner(): void {
 
 function printHelp(): void {
   console.log(`
-FlowPayments — Deterministic Offline Payment Flow & Split Simulator v1.1.0-alpha.1
+FlowPayments — Deterministic Offline Payment Flow & Split Simulator v1.2.0-beta.1
 
 USAGE:
   flowpayments <command> [options]
@@ -41,8 +44,11 @@ COMMANDS:
   sim <flow.json>       Execute simulated payment flow from JSON definition
   explain <flow.json>   Generate human-readable breakdown of flow splits and triggers
   flowchart <flow.json> Generate Mermaid flowchart TD diagram
+  inspect <flow.json>   Display real-time condition tree diagnostics and rules
   validate <flow.json>  Verify flow percentages, remainder rules, and condition references
   scenario <file.json>  Run scripted timeline simulation scenario with assertions
+  batch <file.json>     Execute batch settlement and net aggregation across multiple flows
+  fx <cents> <from> <to>Simulate foreign exchange conversion with spread deduction
   presets               Display built-in preset configurations (marketplace, milestone, waterfall)
 
 OPTIONS:
@@ -156,7 +162,7 @@ function handleCli(): void {
   }
 
   if (command === "--version" || command === "-v") {
-    console.log("flowpayments v1.1.0-alpha.1");
+    console.log("flowpayments v1.2.0-beta.1");
     return;
   }
 
@@ -177,6 +183,28 @@ function handleCli(): void {
         2
       )
     );
+    return;
+  }
+
+  if (command === "inspect") {
+    const filePath = args[1];
+    if (!filePath) {
+      console.error("Error: Please provide a flow JSON file path. Usage: flowpayments inspect <path.json>");
+      process.exit(1);
+    }
+    const langIdx = args.indexOf("--lang");
+    const lang = langIdx !== -1 && args[langIdx + 1] === "it" ? "it" : "en";
+
+    try {
+      const content = readFileSync(resolve(process.cwd(), filePath), "utf8");
+      const flow: FlowDefinition = JSON.parse(content);
+      const sim = new PaymentFlowSimulator(flow);
+      console.log(FlowExplainer.explainFlow(flow, lang));
+      console.log(FlowExplainer.formatConditionStatus(sim.getConditions(), lang));
+    } catch (err: unknown) {
+      console.error(`Inspection failed: ${(err as Error).message}`);
+      process.exit(1);
+    }
     return;
   }
 
@@ -282,6 +310,66 @@ function handleCli(): void {
       }
     } catch (err: unknown) {
       console.error(`Scenario execution failed: ${(err as Error).message}`);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (command === "batch") {
+    const filePath = args[1];
+    if (!filePath) {
+      console.error("Error: Please provide a batch JSON file path. Usage: flowpayments batch <batch.json>");
+      process.exit(1);
+    }
+
+    try {
+      const content = readFileSync(resolve(process.cwd(), filePath), "utf8");
+      const parsed = JSON.parse(content);
+      const engine = new BatchSettlementEngine(parsed.batchId || "batch_sim", parsed.currency || "EUR");
+      for (const f of parsed.flows) {
+        engine.addFlow(f);
+      }
+      const summary = engine.executeBatch();
+      if (args.includes("--json")) {
+        console.log(JSON.stringify(summary, null, 2));
+      } else {
+        console.log(`✓ Batch [${summary.batchId}] Executed: ${summary.totalFlowsCount} flows reconciled.`);
+        console.log(`Total Volume: ${formatCurrency(summary.totalVolumeCents, summary.currency)}`);
+        console.log(`Fully Balanced: ${summary.isFullyBalanced ? "YES (0.00c)" : "NO"}`);
+        console.log(`Batch Merkle Seal: ${summary.batchDigest}`);
+        console.log("\nNetted Payouts:");
+        for (const p of summary.aggregatedPayouts) {
+          console.log(`  • ${p.recipientId}: ${formatCurrency(p.totalNetCents, summary.currency)} (${p.flowCount} flows)`);
+        }
+      }
+    } catch (err: unknown) {
+      console.error(`Batch execution failed: ${(err as Error).message}`);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (command === "fx") {
+    const centsStr = args[1];
+    const fromCur = args[2] as CurrencyCode;
+    const toCur = args[3] as CurrencyCode;
+
+    if (!centsStr || !fromCur || !toCur) {
+      console.error("Usage: flowpayments fx <amountCents> <fromCurrency> <toCurrency>");
+      process.exit(1);
+    }
+
+    try {
+      const fx = new FxExchangeSimulator();
+      const res = fx.convert(parseInt(centsStr, 10), fromCur, toCur);
+      if (args.includes("--json")) {
+        console.log(JSON.stringify(res, null, 2));
+      } else {
+        console.log(`FX Conversion: ${formatCurrency(res.sourceAmountCents, res.sourceCurrency)} -> ${formatCurrency(res.netTargetCents, res.targetCurrency)}`);
+        console.log(`Effective Rate: ${res.effectiveRate} | Spread Fee: ${formatCurrency(res.spreadFeeCents, res.targetCurrency)}`);
+      }
+    } catch (err: unknown) {
+      console.error(`FX conversion failed: ${(err as Error).message}`);
       process.exit(1);
     }
     return;

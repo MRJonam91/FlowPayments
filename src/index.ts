@@ -35,3 +35,13 @@ export {
   type ScenarioRunResult,
   type ScenarioStepLog,
 } from "./scenario/runner.ts";
+export {
+  FxExchangeSimulator,
+  type FxConversionResult,
+  type FxRateConfig,
+} from "./fx/index.ts";
+export {
+  BatchSettlementEngine,
+  type AggregatedPayout,
+  type BatchSettlementSummary,
+} from "./batch/index.ts";
