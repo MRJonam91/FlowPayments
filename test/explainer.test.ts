@@ -28,3 +28,10 @@ test("FlowExplainer - generates valid Mermaid sequence diagram", () => {
   assert.ok(mermaid.startsWith("sequenceDiagram"));
   assert.ok(mermaid.includes("buyer_alice->>vault_marketplace"));
 });
+
+test("FlowExplainer - generates valid Mermaid flowchart diagram", () => {
+  const chart = FlowExplainer.toMermaidFlowchart(marketplaceSplitPreset);
+  assert.ok(chart.startsWith("flowchart TD"));
+  assert.ok(chart.includes("buyer_alice"));
+  assert.ok(chart.includes("vault_marketplace"));
+});

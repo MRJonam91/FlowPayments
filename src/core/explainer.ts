@@ -177,6 +177,45 @@ export class FlowExplainer {
   }
 
   /**
+   * Generates a Mermaid Flowchart diagram representing flow state and splits
+   */
+  public static toMermaidFlowchart(flow: FlowDefinition): string {
+    const vaultId = flow.escrowVaultId ?? "EscrowVault";
+    const cleanPayer = flow.payerId.replace(/[^a-zA-Z0-9_]/g, "_");
+    const cleanVault = vaultId.replace(/[^a-zA-Z0-9_]/g, "_");
+    const lines: string[] = ["flowchart TD"];
+
+    lines.push(
+      `  ${cleanPayer}["Payer: ${flow.payerId}"] -->|Deposit ${formatCurrency(flow.totalAmountCents, flow.currency)}| ${cleanVault}["Escrow Vault"]`
+    );
+
+    if (flow.conditions.length > 0) {
+      lines.push(`  subgraph Conditions["Release Gate Conditions"]`);
+      flow.conditions.forEach((c) => {
+        const cleanC = c.id.replace(/[^a-zA-Z0-9_]/g, "_");
+        lines.push(`    ${cleanC}["${c.id}: ${c.description}"]`);
+      });
+      lines.push(`  end`);
+      lines.push(`  Conditions -.->|All Satisfied| ${cleanVault}`);
+    }
+
+    if (flow.splits) {
+      lines.push(`  subgraph Payouts["Split Beneficiaries"]`);
+      flow.splits.forEach((s) => {
+        const cleanRec = s.recipientId.replace(/[^a-zA-Z0-9_]/g, "_");
+        const detail =
+          s.type === "percentage"
+            ? `${(s.value ?? 0) <= 100 ? s.value ?? 0 : (s.value ?? 0) / 100}%`
+            : s.type;
+        lines.push(`    ${cleanVault} -->|Split: ${detail}| ${cleanRec}["${s.recipientId}"]`);
+      });
+      lines.push(`  end`);
+    }
+
+    return lines.join("\n");
+  }
+
+  /**
    * Formats execution audit summary
    */
   public static formatAuditReport(report: FlowAuditReport, lang: "it" | "en" = "en"): string {

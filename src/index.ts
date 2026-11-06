@@ -27,4 +27,11 @@ export {
   marketplaceSplitPreset,
   milestoneEscrowPreset,
   waterfallRoyaltyPreset,
-} from "./core/presets.ts";
+} from "./presets/index.ts";
+export { FlowBuilder } from "./builder/index.ts";
+export {
+  ScenarioRunner,
+  type ScenarioAction,
+  type ScenarioRunResult,
+  type ScenarioStepLog,
+} from "./scenario/runner.ts";

@@ -202,12 +202,26 @@ export class PaymentFlowSimulator {
   }
 
   /**
-   * Advances simulated clock
+   * Advances simulated clock and triggers automated timeout policies
    */
   public advanceTime(ms: number): void {
     if (ms < 0) throw new Error("Time cannot travel backwards");
     this.simulatedClockMs += ms;
     this.evaluateConditions();
+
+    if (
+      this.flow.timeoutMs !== undefined &&
+      this.simulatedClockMs >= this.flow.timeoutMs &&
+      (this.currentStatus === "ESCROW_LOCKED" || this.currentStatus === "PENDING_CONDITIONS")
+    ) {
+      if (this.flow.timeoutAction === "refund_payer") {
+        this.executeRefund("Escrow timeout expired - automated refund to payer");
+      } else if (this.flow.timeoutAction === "freeze_dispute") {
+        this.executeDispute("Escrow timeout expired - automated dispute freeze");
+      } else if (this.flow.timeoutAction === "release_remainder") {
+        this.executeRelease();
+      }
+    }
   }
 
   /**
@@ -507,15 +521,42 @@ export class PaymentFlowSimulator {
   }
 
   /**
-   * Raises a dispute, locking funds
+   * Raises a dispute, locking funds and optionally deducting arbitration fee
    */
-  public executeDispute(reason: string): ExecutionStepResult {
+  public executeDispute(
+    reason: string,
+    arbitrationFeeCents = 0,
+    feeRecipientId?: string
+  ): ExecutionStepResult {
+    const entries = [];
+    if (arbitrationFeeCents > 0 && feeRecipientId) {
+      const vaultId = this.flow.escrowVaultId ?? `vault_${this.flow.id}`;
+      if (!this.ledger.getAccount(feeRecipientId)) {
+        this.ledger.registerAccount(
+          feeRecipientId,
+          `Arbitrator: ${feeRecipientId}`,
+          "platform",
+          0
+        );
+      }
+      entries.push(
+        this.ledger.transfer(
+          this.flow.id,
+          vaultId,
+          feeRecipientId,
+          arbitrationFeeCents,
+          `Arbitration fee: ${reason}`,
+          this.simulatedClockMs
+        )
+      );
+    }
+
     this.currentStatus = "DISPUTED";
     const result: ExecutionStepResult = {
       step: "DISPUTE_RAISED",
       timestamp: this.simulatedClockMs,
       status: this.currentStatus,
-      journalEntries: [],
+      journalEntries: entries,
       unmetConditions: this.getUnmetConditionIds(),
       notes: `Escrow release frozen due to dispute: ${reason}`,
     };

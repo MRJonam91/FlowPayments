@@ -8,10 +8,12 @@ Guida per la verifica di conformità e la pubblicazione di FlowPayments secondo 
 - [x] File `LICENSING.md` bilingue con matrice di attribuzione e diritti
 - [x] Canali di donazione attivi in `.github/FUNDING.yml` e nei `README`
 - [x] Pipeline di Continuous Integration (GitHub Actions) configurata per Node.js 22 e 24
-- [x] Guardia architetturale core verificata (< 1.500 LOC, attualmente 1.237 LOC)
-- [x] Suite di test automatizzati completa (15/15 test passati al 100%)
+- [x] Guardia architetturale core verificata (< 1.500 LOC, attualmente 1.127 LOC)
+- [x] Suite di test automatizzati completa (25/25 test passati al 100%, inclusi 1.000 test property-based)
 - [x] Documentazione bilingue completa (Italiano / English)
 - [x] Prova di laboratorio verificabile riproducibile (`flowpayments trial` / `npm run trial`)
+- [x] Fluent FlowBuilder & ScenarioRunner integrati
+- [x] Generazione diagrammi Mermaid (Sequence & Flowchart TD)
 - [x] Nessuna dipendenza runtime esterna (zero third-party dependencies)
 - [x] Anteprima visiva SVG (`docs/assets/demo.svg`) inclusa nei README
 - [x] Marker anti-plagio registrati nel catalogo riservato `_provenance/FlowPayments.json`

@@ -6,12 +6,15 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   DoubleEntryLedger,
+  FlowBuilder,
   FlowExplainer,
   PaymentFlowSimulator,
+  ScenarioRunner,
   formatCurrency,
   marketplaceSplitPreset,
   milestoneEscrowPreset,
   waterfallRoyaltyPreset,
+  type ScenarioAction,
 } from "../index.ts";
 import type { FlowDefinition } from "../core/types.ts";
 
@@ -19,13 +22,15 @@ function printSponsorBanner(): void {
   if (process.env.NO_SPONSOR === "1" || process.env.CI) return;
   // Discrete sponsor notice 1 time out of 10
   if (Math.random() < 0.1) {
-    console.log("\n♥ Support FlowPayments development: https://github.com/sponsors/MRJonam91 (suppress with NO_SPONSOR=1)");
+    console.log(
+      "\n♥ Support FlowPayments development: https://github.com/sponsors/MRJonam91 (suppress with NO_SPONSOR=1)"
+    );
   }
 }
 
 function printHelp(): void {
   console.log(`
-FlowPayments — Deterministic Offline Payment Flow & Split Simulator v1.0.0
+FlowPayments — Deterministic Offline Payment Flow & Split Simulator v1.1.0-alpha.1
 
 USAGE:
   flowpayments <command> [options]
@@ -35,7 +40,9 @@ COMMANDS:
   trial                 Run verifiable multi-scenario test suite & double-entry reconciliation
   sim <flow.json>       Execute simulated payment flow from JSON definition
   explain <flow.json>   Generate human-readable breakdown of flow splits and triggers
+  flowchart <flow.json> Generate Mermaid flowchart TD diagram
   validate <flow.json>  Verify flow percentages, remainder rules, and condition references
+  scenario <file.json>  Run scripted timeline simulation scenario with assertions
   presets               Display built-in preset configurations (marketplace, milestone, waterfall)
 
 OPTIONS:
@@ -99,11 +106,15 @@ function runTrial(): void {
 
   console.log("Phase 2: Client signs off...");
   sim2.recordApproval("cond_phase2_quorum", "enterprise_client");
-  console.log(`Quorum complete? (Need 2): ${sim2.getConditions().find(c => c.id === "cond_phase2_quorum")?.isSatisfied}`);
+  console.log(
+    `Quorum complete? (Need 2): ${sim2.getConditions().find((c) => c.id === "cond_phase2_quorum")?.isSatisfied}`
+  );
 
   console.log("Phase 2: Independent QA Auditor inspects and signs off...");
   sim2.recordApproval("cond_phase2_quorum", "qa_auditor_dave");
-  console.log(`Quorum complete? (Need 2): ${sim2.getConditions().find(c => c.id === "cond_phase2_quorum")?.isSatisfied}`);
+  console.log(
+    `Quorum complete? (Need 2): ${sim2.getConditions().find((c) => c.id === "cond_phase2_quorum")?.isSatisfied}`
+  );
 
   sim2.executeRelease("milestone_phase_2");
   console.log("Phase 2 released! All contract milestones completed.");
@@ -145,7 +156,7 @@ function handleCli(): void {
   }
 
   if (command === "--version" || command === "-v") {
-    console.log("flowpayments v1.0.0");
+    console.log("flowpayments v1.1.0-alpha.1");
     return;
   }
 
@@ -155,18 +166,45 @@ function handleCli(): void {
   }
 
   if (command === "presets") {
-    console.log(JSON.stringify({
-      marketplace: marketplaceSplitPreset,
-      milestone: milestoneEscrowPreset,
-      waterfall: waterfallRoyaltyPreset,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          marketplace: marketplaceSplitPreset,
+          milestone: milestoneEscrowPreset,
+          waterfall: waterfallRoyaltyPreset,
+        },
+        null,
+        2
+      )
+    );
+    return;
+  }
+
+  if (command === "flowchart") {
+    const filePath = args[1];
+    if (!filePath) {
+      console.error(
+        "Error: Please provide a flow JSON file path. Usage: flowpayments flowchart <path.json>"
+      );
+      process.exit(1);
+    }
+    try {
+      const content = readFileSync(resolve(process.cwd(), filePath), "utf8");
+      const flow: FlowDefinition = JSON.parse(content);
+      console.log(FlowExplainer.toMermaidFlowchart(flow));
+    } catch (err: unknown) {
+      console.error(`Error generating flowchart: ${(err as Error).message}`);
+      process.exit(1);
+    }
     return;
   }
 
   if (command === "explain") {
     const filePath = args[1];
     if (!filePath) {
-      console.error("Error: Please provide a flow JSON file path. Usage: flowpayments explain <path.json>");
+      console.error(
+        "Error: Please provide a flow JSON file path. Usage: flowpayments explain <path.json>"
+      );
       process.exit(1);
     }
     const isMermaid = args.includes("--mermaid");
@@ -191,7 +229,9 @@ function handleCli(): void {
   if (command === "validate") {
     const filePath = args[1];
     if (!filePath) {
-      console.error("Error: Please provide a flow JSON file path. Usage: flowpayments validate <path.json>");
+      console.error(
+        "Error: Please provide a flow JSON file path. Usage: flowpayments validate <path.json>"
+      );
       process.exit(1);
     }
 
@@ -213,6 +253,35 @@ function handleCli(): void {
       }
     } catch (err: unknown) {
       console.error(`Validation failed: ${(err as Error).message}`);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (command === "scenario") {
+    const filePath = args[1];
+    if (!filePath) {
+      console.error(
+        "Error: Please provide a scenario JSON file path. Usage: flowpayments scenario <scenario.json>"
+      );
+      process.exit(1);
+    }
+
+    try {
+      const content = readFileSync(resolve(process.cwd(), filePath), "utf8");
+      const parsed = JSON.parse(content);
+      const runner = new ScenarioRunner(parsed.flow);
+      const res = runner.runAll(parsed.actions as ScenarioAction[]);
+
+      if (args.includes("--json")) {
+        console.log(JSON.stringify(res, null, 2));
+      } else {
+        console.log(`✓ Scenario executed successfully: ${res.totalSteps} steps completed.`);
+        console.log(`Final Status: ${res.finalStatus}`);
+        console.log(`Reconciled: ${res.auditReport.isBalanced ? "YES (0.00c)" : "NO"}`);
+      }
+    } catch (err: unknown) {
+      console.error(`Scenario execution failed: ${(err as Error).message}`);
       process.exit(1);
     }
     return;
